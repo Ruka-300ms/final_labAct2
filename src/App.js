@@ -2,11 +2,7 @@
 import React, { useEffect, useState } from "react";
 import * as tf from "@tensorflow/tfjs";
 
-/* ===========================================================================
-   Helper: Data Augmentation
-   - Produces synthetic inventory, sales, lead-time and features array for ML.
-   - Functionality intentionally kept equivalent to your original augmentProductData.
-   =========================================================================== */
+/*Helper: Data Augmentation */
 const createAugmentedProducts = (rawProducts = []) =>
   rawProducts.map((p) => {
     const baseInv = Math.round(p.price * 2.5 + p.id * 5);
@@ -24,13 +20,9 @@ const createAugmentedProducts = (rawProducts = []) =>
     };
   });
 
-/* ===========================================================================
-   Model training helper
-   - Builds, compiles and trains the same sequential model configuration
-   - Uses the exact training features & labels from the original implementation
-   =========================================================================== */
+/* Model training helper*/
 const buildAndTrainModel = async (onEpochEnd = null) => {
-  // Training data (unchanged)
+  // Training data 
   const trainingFeatures = tf.tensor2d([
     [20, 50, 3],
     [5, 30, 5],
@@ -39,7 +31,7 @@ const buildAndTrainModel = async (onEpochEnd = null) => {
   ]);
   const trainingLabels = tf.tensor2d([[0], [1], [0], [1]]);
 
-  // Model architecture (unchanged)
+  // Model architecture
   const model = tf.sequential();
   model.add(tf.layers.dense({ inputShape: [3], units: 8, activation: "relu" }));
   model.add(tf.layers.dense({ units: 1, activation: "sigmoid" }));
@@ -50,7 +42,7 @@ const buildAndTrainModel = async (onEpochEnd = null) => {
     metrics: ["accuracy"],
   });
 
-  // Train (identical epochs & shuffle)
+  // Train
   await model.fit(trainingFeatures, trainingLabels, {
     epochs: 200,
     shuffle: true,
@@ -64,10 +56,7 @@ const buildAndTrainModel = async (onEpochEnd = null) => {
   return model;
 };
 
-/* ===========================================================================
-   Small presentational components for the dashboard layout.
-   All inline styling is local so it's self-contained and easy to drop in.
-   =========================================================================== */
+//Small presentational components for the dashboard layout.
 const HeaderBar = ({ title }) => (
   <header style={styles.header}>
     <div style={styles.headerInner}>
@@ -117,19 +106,17 @@ const Toolbar = ({ onTrain, onPredict, isTrained }) => (
   </div>
 );
 
-/* ===========================================================================
-   Main Component
-   - Keeps all logic (fetch, augment, train, predict) but reorganized and
-     documented with clearer variable names and separated helpers + components.
-   =========================================================================== */
+
+   //Main Component
+
 export default function InventoryDashboard() {
-  const [items, setItems] = useState([]); // augmented product list
+  const [items, setItems] = useState([]); 
   const [loading, setLoading] = useState(true);
   const [isModelReady, setModelReady] = useState(false);
   const [tfModel, setTfModel] = useState(null);
-  const [totalReorder, setTotalReorder] = useState(0); // simple stat for UI
+  const [totalReorder, setTotalReorder] = useState(0); 
 
-  // Fetch & augment products on mount (same external URL and limit)
+  // Fetch & augment products on mount
   useEffect(() => {
     const loadProducts = async () => {
       try {
@@ -175,7 +162,7 @@ export default function InventoryDashboard() {
       // model.predict returns a tensor; we read value synchronously
       const res = tfModel.predict(features);
 
-      // read the scalar probability (exactly as before)
+      // read the scalar probability
       const prob = res.dataSync()[0];
 
       // cleanup tensors
@@ -284,9 +271,8 @@ export default function InventoryDashboard() {
   );
 }
 
-/* ===========================================================================
-   Local styles (self-contained). Colors and layout updated to dashboard style.
-   =========================================================================== */
+
+   //Local styles (self-contained)
 const styles = {
   page: {
     fontFamily: "Inter, Arial, sans-serif",
